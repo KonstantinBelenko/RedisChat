@@ -31,10 +31,56 @@ class ChatApp:
         else:
             print(f"{receiver_id} is not in your contacts.")
 
-bot = telebot.TeleBot(TELEGRAM_API_TOKEN)
+bot = telebot.TeleBot("6123864581:AAFBqwforEzbcav9V-V2LiYwfdilzicdYb4")
 chat_app = ChatApp(bot)
 
-# * Add bot hooks here 
+# * Add bot hooks here
+
+contacts = ["John", "Mary", "Peter", "Alice"]
+main_contact = None
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.reply_to(message, "Welcome to my bot!")
+
+@bot.message_handler(commands=['add_contact'])
+def add_contact(message):
+    if message.text == "/add_contact":
+        bot.reply_to(message, "Please write the contact information in the following format: \\add_contact <name>")
+    else:
+        contact_info = message.text.split(maxsplit=1)[1]
+        contacts.append(contact_info)
+        bot.reply_to(message, f"Contact {contact_info} added successfully.")
+
+@bot.message_handler(commands=['remove_contact'])
+def remove_contact(message):
+    print(message.text)
+    if message.text == "/remove_contact":
+        bot.reply_to(message, "Please write the contact information in the following format: \\add_contact <name>")
+    else:
+        contact_name = message.text.split(maxsplit=1)[1]
+        if contact_name in contacts:
+            contacts.remove(contact_name)
+            bot.reply_to(message, f"Contact {contact_name} removed successfully.")
+        else:
+            bot.reply_to(message, f"Contact {contact_name} not found.")
+
+@bot.message_handler(commands=['switch_contact'])
+def switch_contact(message):
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    for contact in contacts:
+        keyboard.add(KeyboardButton(contact))
+    bot.send_message(chat_id=message.chat.id, text="Please choose a contact to switch on.", reply_markup=keyboard)
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    global main_contact
+
+    # Check if the message matches a contact in the list
+    if message.text in contacts:
+        main_contact = message.text
+        bot.reply_to(message, f"You have switched to {message.text}.")
+    else:
+        bot.reply_to(message, "Invalid input. Please choose a contact from the list.")
 
 # * Add bot hooks here 
 
