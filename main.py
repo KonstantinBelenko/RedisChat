@@ -33,3 +33,30 @@ class ChatApp:
 
 bot = telebot.TeleBot(TELEGRAM_API_TOKEN)
 chat_app = ChatApp(bot)
+
+# * Add bot hooks here 
+
+# * Add bot hooks here 
+
+def listen_for_messages():
+    pubsub = chat_app.redis.pubsub()
+    pubsub.subscribe("connected_users")
+
+    for message in pubsub.listen():
+        if message["type"] == "message":
+            message_data = json.loads(message["data"].decode("utf-8"))
+            sender_id = message_data["sender_id"]
+            content = message_data["content"]
+            chat_id = int(message["channel"].decode("utf-8"))
+            bot.send_message(chat_id, f"Message from {sender_id}: {content}")
+
+
+if __name__ == "__main__":
+    import threading
+
+    listen_thread = threading.Thread(target=listen_for_messages)
+    listen_thread.setDaemon(True)
+    listen_thread.start()
+
+    print("Bot is running...")
+    bot.polling()
