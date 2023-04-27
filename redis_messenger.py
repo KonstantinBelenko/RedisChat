@@ -66,32 +66,59 @@ class RedisMessenger:
                 users.append(user_data)
         return users
 
+    def add_contact(self, user_id, contact_id):
+        """Add a contact to the user's contact list."""
+        self.redis_conn.sadd(f'user_contacts:{user_id}', contact_id)
+
+    def list_contacts(self, user_id):
+        """List all contacts for a user."""
+        contact_ids = self.redis_conn.smembers(f'user_contacts:{user_id}')
+        contacts = []
+        for contact_id in contact_ids:
+            contact_data_raw = self.redis_conn.hgetall(f'user:{contact_id.decode()}')
+            contact_data = {k.decode(): v.decode() for k, v in contact_data_raw.items()}
+            contacts.append(contact_data)
+        return contacts
+    
+    def check_user_exists(self, user_id) -> bool:
+        """Check if a user exists."""
+        return self.redis_conn.exists(f'user:{user_id}')
 
 def main():
     messenger = RedisMessenger()
 
-    try:
-        user1_id = messenger.create_user('Alice')
-        user2_id = messenger.create_user('Bob')
-    except ValueError as e:
-        print(e)
-        return
+    # try:
+    #     user1_id = messenger.create_user('Alice')
+    #     user2_id = messenger.create_user('Bob')
+    # except ValueError as e:
+    #     print(e)
+    #     return
 
-    print(f"User 1 ID: {user1_id}")
-    print(f"User 2 ID: {user2_id}")
+    # print(f"User 1 ID: {user1_id}")
+    # print(f"User 2 ID: {user2_id}")
 
-    message_id = messenger.send_message(user1_id, user2_id, "Hello, Bob!")
-    print(f"Sent message ID: {message_id}")
+    # message_id = messenger.send_message(user1_id, user2_id, "Hello, Bob!")
+    # print(f"Sent message ID: {message_id}")
 
-    messages = messenger.list_user_messages(user2_id)
-    print("Messages for User 2:")
-    for message in messages:
-        print(json.dumps(message, indent=2))
+    # messages = messenger.list_user_messages(user2_id)
+    # print("Messages for User 2:")
+    # for message in messages:
+        # print(json.dumps(message, indent=2))
 
-    users = messenger.list_all_users()
-    print("All users:")
-    for user in users:
-        print(json.dumps(user, indent=2))
+    # users = messenger.list_all_users()
+    # print("All users:")
+    # for user in users:
+    #     print(json.dumps(user, indent=2))
+
+    a = messenger.list_user_messages('a54f4326-a688-4c8f-9d09-cd64a93cb4d8')
+    for msg in a:
+        print(json.dumps(msg, indent=2))
+
+    # messenger.send_message('a54f4326-a688-4c8f-9d09-cd64a93cb4d8', 'b6bac8ae-39d3-45d5-a5df-4798a4679d61', "Ya skazal \"rediska\" na russkom :)")
+
+    # a = messenger.list_user_messages('b6bac8ae-39d3-45d5-a5df-4798a4679d61') 
+    # for msg in a: 
+        # print(json.dumps(msg, indent=2))
 
 if __name__ == '__main__':
     main()
