@@ -2,6 +2,36 @@
 
 A simple Python messenger application using Redis as the datastore. The application allows creating users, sending messages between users, listing messages for a user, and listing all users.
 
+```bash
+Communication with reds -> redis_messenger.py
+Communication with user -> chat.py
+```
+
+Schema:
+```bash
+user:<user_id> (HASH)
+    - user_id (STRING): UUID of the user
+    - username (STRING): Username of the user
+
+usernames (HASH)
+    - <username> (FIELD): User's username
+    - <user_id> (VALUE): Corresponding user UUID
+
+user_contacts:<user_id> (SET)
+    - <contact_id> (STRING): UUID of a contact in the user's contact list
+
+messages (LIST)
+    - <message_key> (STRING): Key of the message stored in Redis
+
+message:<message_id> (HASH)
+    - message_id (STRING): UUID of the message
+    - sender_id (STRING): UUID of the sender
+    - recipient_id (STRING): UUID of the recipient
+    - timestamp (STRING): Timestamp when the message was sent
+    - message (STRING): Content of the message
+    - seen (STRING): 'True' if the message has been seen, 'False' otherwise
+```
+
 ## Redis Data Structures
 
 The application uses the following Redis data structures:
