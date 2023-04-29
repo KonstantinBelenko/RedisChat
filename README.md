@@ -3,7 +3,7 @@
 A simple Python messenger application using Redis as the datastore. The application allows creating users, sending messages between users, listing messages for a user, and listing all users.
 
 ```bash
-Communication with reds -> redis_messenger.py
+Communication with redis -> redis_messenger.py
 Communication with user -> chat.py
 ```
 
